@@ -10,7 +10,7 @@ use tokio::io::ReadBuf;
 /// [       initialized        |     uninitialized    ]
 /// [ +++ filled +++ | -------- unfilled              ]
 ///       ^------ cursor
-/// ```text
+/// ```
 ///
 /// ```text
 /// [ ++++*+++++++++++---------xxxxxxxxxxxxxxxxxxxxxxx]
