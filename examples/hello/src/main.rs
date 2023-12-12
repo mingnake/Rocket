@@ -72,15 +72,32 @@ fn hello(lang: Option<Lang>, opt: Options<'_>) -> String {
     greeting
 }
 
+#[post("/", data = "<data>")]
+fn sink(data: Vec<u8>) {
+    println!("{}", data.len());
+}
+
 #[launch]
 fn rocket() -> _ {
     use rocket::fairing::AdHoc;
 
     rocket::build()
-        .mount("/", routes![hello])
+        .mount("/", routes![hello, sink])
         .mount("/hello", routes![world, mir])
         .mount("/wave", routes![wave])
-        .attach(AdHoc::on_request("Compatibility Normalizer", |req, _| Box::pin(async move {
+        .attach(AdHoc::on_request("Compatibility Normalizer", |req, data| Box::pin(async move {
+            println!("on_req");
+            data.transform_inspect(|bytes| {
+                println!("INIT: ({}) {bytes:X?}", bytes.len());
+            });
+
+            use std::collections::hash_map::DefaultHasher;
+            data.hash_transform(DefaultHasher::new());
+
+            data.transform_inspect(|bytes| {
+                println!("HASH: ({}) {bytes:X?}", bytes.len());
+            });
+
             if !req.uri().is_normalized_nontrailing() {
                 let normal = req.uri().clone().into_normalized_nontrailing();
                 warn!("Incoming request URI was normalized for compatibility.");
