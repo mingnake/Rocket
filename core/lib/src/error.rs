@@ -76,6 +76,8 @@ pub struct Error {
 pub enum ErrorKind {
     /// Binding to the provided address/port failed.
     Bind(io::Error),
+    /// Binding to the provided address/port failed.
+    TlsBind(crate::http::tls::error::Error),
     /// An I/O error occurred during launch.
     Io(io::Error),
     /// A valid [`Config`](crate::Config) could not be extracted from the
@@ -234,6 +236,7 @@ impl Error {
 
                 "aborting due to failed shutdown"
             }
+            ErrorKind::TlsBind(_) => todo!(),
         }
     }
 }
@@ -253,6 +256,7 @@ impl fmt::Display for ErrorKind {
             ErrorKind::SentinelAborts(_) => "sentinel(s) aborted".fmt(f),
             ErrorKind::Shutdown(_, Some(e)) => write!(f, "shutdown failed: {}", e),
             ErrorKind::Shutdown(_, None) => "shutdown failed".fmt(f),
+            ErrorKind::TlsBind(_) => todo!(),
         }
     }
 }
